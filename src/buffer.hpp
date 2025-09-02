@@ -13,7 +13,7 @@ public:
      * @param capacity Número máximo de mensagens que o buffer pode armazenar
      * @throws std::invalid_argument se capacity for 0
      */
-    explicit MessageBuffer(size_t capacity) : max_capacity(capacity) {
+    explicit MessageBuffer(size_t capacity) : max_capacity(capacity), is_shutdown(false) {
         if (capacity == 0) {
             throw std::invalid_argument("Capacidade do buffer deve ser maior que zero");
         }
@@ -33,6 +33,7 @@ public:
      */
     bool push(const std::string& message) {
         std::unique_lock<std::mutex> lock(mutex);
+        // std::cout << "adicionando: " << message << std::endl;
 
         // Espera até haver espaço ou buffer ser fechado
         not_full.wait(lock, [this]() {

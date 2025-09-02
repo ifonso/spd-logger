@@ -5,6 +5,7 @@
 
 #include <iostream>
 #include <exception>
+#include <memory>
 #include <array>
 #include <thread>
 #include <atomic>
@@ -82,7 +83,7 @@ private:
      * @return Duração em milissegundos para próximo log
      */
     std::chrono::milliseconds get_random_interval() const {
-        std::uniform_int_distribution<int> distribution(3000, 10000);
+        std::uniform_int_distribution<int> distribution(1000, 5000);
         return std::chrono::milliseconds(distribution(generator));
     }
 
@@ -154,7 +155,12 @@ private:
                 std::string message = get_random_message(level);
 
                 // Registra o log
-                logger.log(message, level, producer_id);
+                std::unique_ptr<std::string> log = logger.log(message, level, producer_id);
+                if (log) {
+                    std::cout << "[PRODUCER " << producer_id <<  "] enviando: \n"
+                        << *log << "\n"
+                        << std::endl;
+                }
 
                 // Aguarda intervalo aleatório
                 std::chrono::milliseconds interval = get_random_interval();

@@ -4,6 +4,7 @@
 #include <string>
 #include <chrono>
 #include <sstream>
+#include <memory>
 #include <iostream>
 #include <iomanip>
 
@@ -39,10 +40,12 @@ public:
     explicit Logger(LogBuffer& buffer) : internal_buffer(buffer) {}
 
     /**
-    * @brief Registra uma mensagem de log
+    * @brief Registra uma mensagem de log no buffer
     * @param message Texto da mensagem a ser registrada
     * @param level Nível de severidade do log
     * @param producer_id ID numérico do produtor/módulo que gerou o log
+    * @return Em caso de sucesso, retorna um std::unique_ptr contendo a string de log
+    * formatada em JSON. Em caso de falha (ex: buffer cheio), retorna `nullptr`.
     *
     * Gera um JSON formatado com timestamp automático e envia para o buffer.
     *
@@ -56,9 +59,14 @@ public:
     * }
     * @endcode
     */
-    void log(const std::string& message, LogLevel level, int producer_id) {
+    std::unique_ptr<std::string> log(const std::string& message, LogLevel level, int producer_id) {
         std::string formatted = generate_formatted_json_log(message, producer_id, level);
-        internal_buffer.push(formatted);
+
+        if (internal_buffer.push(formatted)) {
+            return std::unique_ptr<std::string>(new std::string(formatted));
+        } else {
+            return nullptr;
+        }
     }
 
 private:
@@ -111,7 +119,7 @@ private:
         json << "  \"level\": \"" << escape_json_string(level_to_string(level)) << "\",\n";
         json << "  \"producer_id\": " << producer_id << ",\n";
         json << "  \"message\": \"" << escape_json_string(message) << "\"\n";
-        json << "}";
+        json << "},";
 
         return json.str();
     }

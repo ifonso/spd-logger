@@ -6,9 +6,8 @@
 #include <atomic>
 #include <iostream>
 
-#include "file_writer.hpp"
 
-template<typename LogBuffer>
+template<typename LogBuffer, typename FileWriter>
 class Consumer {
 public:
     /**
@@ -17,7 +16,7 @@ public:
      * @param consumer_id ID único deste consumer
      * @param filename Nome do arquivo onde logs serão escritos (padrão: "log.json")
      */
-    Consumer(LogBuffer& buffer, int consumer_id, FileWriter& log_writer)
+    Consumer(LogBuffer& buffer, FileWriter& log_writer, int consumer_id)
         : buffer_ref(buffer),
           consumer_id(consumer_id),
           is_running(false),
@@ -94,10 +93,11 @@ private:
                 if (buffer_ref.pop(message)) {
                     log_writer.append(message);
 
-                    std::cout << "[CONSUMER " << consumer_id << "] processou: "
-                                << message.substr(0, 10)
-                                << (message.length() > 50 ? "..." : "")
-                                << std::endl;
+                    // Log no terminal sem quebrar a mensagem
+                    std::ostringstream oss;
+                    oss << "\n[CONSUMER " << consumer_id << "] processou: " << message;
+                    std::cout << oss.str() << std::endl;
+
                 } else {
                     std::this_thread::sleep_for(std::chrono::milliseconds(10));
                 }

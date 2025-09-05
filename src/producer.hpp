@@ -22,7 +22,7 @@ public:
      * @param producer_id ID único deste producer
      */
     explicit Producer(LogBuffer& buffer, int producer_id)
-        : logger(buffer),
+        : logger(),
           buffer_ref(buffer),
           producer_id(producer_id),
           is_running(false),
@@ -79,11 +79,11 @@ private:
     mutable std::mt19937 generator;     ///< Gerador de números aleatórios
 
     /**
-     * @brief Gera intervalo aleatório entre 3 e 10 segundos
+     * @brief Gera intervalo aleatório entre 0 e 2 segundos
      * @return Duração em milissegundos para próximo log
      */
     std::chrono::milliseconds get_random_interval() const {
-        std::uniform_int_distribution<int> distribution(1000, 5000);
+        std::uniform_int_distribution<int> distribution(0, 2000);
         return std::chrono::milliseconds(distribution(generator));
     }
 
@@ -155,11 +155,13 @@ private:
                 std::string message = get_random_message(level);
 
                 // Registra o log
-                std::unique_ptr<std::string> log = logger.log(message, level, producer_id);
+                std::unique_ptr<std::string> log = logger.log(message, level, producer_id, buffer_ref);
+
                 if (log) {
-                    std::cout << "[PRODUCER " << producer_id <<  "] enviando: \n"
-                        << *log << "\n"
-                        << std::endl;
+                    // Log no terminal sem quebrar a mensagem
+                    std::ostringstream oss;
+                    oss << "\n[PRODUCER " << producer_id <<  "] enviando: \n" << *log;
+                    std::cout << oss.str() << std::endl;
                 }
 
                 // Aguarda intervalo aleatório

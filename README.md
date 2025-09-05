@@ -24,6 +24,49 @@ Para esse cenário, teremos produtores de logs, simulando diferentes partes do s
 }
 ```
 
+### Arquitetura Simplificada
+
+```mermaid
+classDiagram
+    class Producer {
+        +start()
+        +stop()
+        ~logging_routine()
+    }
+
+    class MessageBuffer {
+        +push(message)
+        +pop(message)
+        +shutdown()
+    }
+
+    class Consumer {
+        +start()
+        +stop()
+        ~writing_routine()
+    }
+
+    class FileWriter {
+        +append(json_line)
+    }
+
+    class Logger {
+        +log(message, level, id)
+    }
+
+    %% Relacionamentos centralizados no MessageBuffer
+    Producer --> MessageBuffer : "escreve mensagens em"
+    Consumer --> MessageBuffer : "consume mensagens de"
+    Consumer --> FileWriter : "salva logs no arquivo"
+    Producer --> Logger : "usa para formatar"
+
+    %% Notas explicativas
+    note for Producer "Gera logs automaticamente"
+    note for MessageBuffer "Instância única - buffer central thread-safe"
+    note for Consumer "Consome mensagens do buffer"
+    note for FileWriter "Escrita thread-safe em arquivo JSON"
+```
+
 ### Funcionamento
 
 1. Sempre que um produtor gera uma mensagem de log, ela é colocada em um buffer compartilhado (fila).

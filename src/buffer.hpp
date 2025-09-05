@@ -33,7 +33,6 @@ public:
      */
     bool push(const std::string& message) {
         std::unique_lock<std::mutex> lock(mutex);
-        // std::cout << "adicionando: " << message << std::endl;
 
         // Espera até haver espaço ou buffer ser fechado
         not_full.wait(lock, [this]() {
@@ -79,26 +78,6 @@ public:
         not_full.notify_one();
 
         return true;
-    }
-
-    /**
-     * @brief Verifica se buffer está cheio
-     * @return true se buffer está cheio
-     * @note Esta informação pode mudar imediatamente após o retorno
-     */
-    bool full() const {
-        std::lock_guard<std::mutex> lock(mutex);
-        return buffer.size() >= max_capacity;
-    }
-
-    /**
-     * @brief Verifica se buffer está vazio
-     * @return true se buffer está vazio
-     * @note Esta informação pode mudar imediatamente após o retorno
-     */
-    bool empty() const {
-        std::lock_guard<std::mutex> lock(mutex);
-        return buffer.empty();
     }
 
     /**

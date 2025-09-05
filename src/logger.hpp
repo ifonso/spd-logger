@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cstdio>
 #include <ctime>
 #include <string>
 #include <chrono>
@@ -30,14 +31,7 @@ enum class LogLevel {
 template<typename LogBuffer>
 class Logger {
 public:
-    /**
-    * @brief Construtor que vincula o logger a um buffer específico
-    * @param buffer Referência para o buffer onde logs serão enviados
-    *
-    * @note O buffer deve existir durante toda vida útil do logger
-    * @warning Não copie o logger - ele mantém referência ao buffer original
-    */
-    explicit Logger(LogBuffer& buffer) : internal_buffer(buffer) {}
+    explicit Logger() {}
 
     /**
     * @brief Registra uma mensagem de log no buffer
@@ -59,10 +53,10 @@ public:
     * }
     * @endcode
     */
-    std::unique_ptr<std::string> log(const std::string& message, LogLevel level, int producer_id) {
+    std::unique_ptr<std::string> log(const std::string& message, LogLevel level, int producer_id, LogBuffer& stdout) const {
         std::string formatted = generate_formatted_json_log(message, producer_id, level);
 
-        if (internal_buffer.push(formatted)) {
+        if (stdout.push(formatted)) {
             return std::unique_ptr<std::string>(new std::string(formatted));
         } else {
             return nullptr;
@@ -70,8 +64,6 @@ public:
     }
 
 private:
-    LogBuffer& internal_buffer;
-
     std::string level_to_string(LogLevel level) const {
         switch (level) {
             case LogLevel::INFO: return "INFO";

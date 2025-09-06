@@ -1,3 +1,13 @@
+// Author: Afonso Lucas
+//
+// # Referências:
+//
+// The Producer Consumer Pattern - https://jenkov.com/tutorials/java-concurrency/producer-consumer.html
+// Producer Consumer Patterns - https://sworthodoxy.blogspot.com/2020/05/producer-consumer-patterns.html
+// Conditional Variables - https://en.cppreference.com/w/cpp/thread/condition_variable.html
+// Mutex - https://en.cppreference.com/w/cpp/thread/mutex.html
+// Doxygen - https://www.doxygen.nl/manual/docblocks.html
+
 #include <iostream>
 #include <string>
 
@@ -5,13 +15,6 @@
 #include "buffer.hpp"
 #include "producer.hpp"
 #include "consumer.hpp"
-
-// O que é produtor x consumidor? 1 buffer
-// Qual o nosso problema?
-// Buffer -> Nossa fila de logs JSON
-// Producer -> Produtor/emissor de logs.
-// Consumer -> Consome os logs do buffer e escreve no arquivo.
-
 
 int main() {
     MessageBuffer messageBuffer(3);
